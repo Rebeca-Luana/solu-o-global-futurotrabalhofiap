@@ -1,194 +1,225 @@
-'use client';
+"use client"
 
-import { useState } from 'react';
+import type React from "react"
+
+import { useState } from "react"
+import { Loader2 } from "lucide-react"
 
 export default function Hero() {
-  const [formState, setFormState] = useState({
-    name: '',
-    email: '',
-    objective: '',
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    goal: "",
+  })
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
 
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
+  const validateEmail = (email: string) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return regex.test(email)
+  }
 
-    if (!formState.name.trim()) {
-      newErrors.name = 'Nome é obrigatório';
+  const validateField = (name: string, value: string) => {
+    const newErrors = { ...errors }
+
+    if (name === "name") {
+      if (!value.trim()) {
+        newErrors.name = "Nome é obrigatório"
+      } else {
+        delete newErrors.name
+      }
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!formState.email.trim()) {
-      newErrors.email = 'E-mail é obrigatório';
-    } else if (!emailRegex.test(formState.email)) {
-      newErrors.email = 'E-mail inválido';
+    if (name === "email") {
+      if (!value.trim()) {
+        newErrors.email = "Email é obrigatório"
+      } else if (!validateEmail(value)) {
+        newErrors.email = "Email inválido"
+      } else {
+        delete newErrors.email
+      }
     }
 
-    if (!formState.objective.trim()) {
-      newErrors.objective = 'Objetivo profissional é obrigatório';
+    if (name === "goal") {
+      if (!value) {
+        newErrors.goal = "Selecione um objetivo"
+      } else {
+        delete newErrors.goal
+      }
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    setErrors(newErrors)
+  }
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+    validateField(name, value)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
-    if (!validateForm()) {
-      return;
+    // Validate all fields
+    validateField("name", formData.name)
+    validateField("email", formData.email)
+    validateField("goal", formData.goal)
+
+    if (!formData.name || !formData.email || !formData.goal || !validateEmail(formData.email)) {
+      return
     }
 
-    setIsLoading(true);
-    setSuccessMessage('');
+    setIsSubmitting(true)
 
     // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    await new Promise((resolve) => setTimeout(resolve, 1500))
 
-    setIsLoading(false);
-    setSuccessMessage('Cadastro realizado com sucesso! Você receberá nossos conteúdos em breve.');
-    setFormState({ name: '', email: '', objective: '' });
+    setIsSubmitting(false)
+    setIsSuccess(true)
 
-    // Auto-clear success message after 5 seconds
-    setTimeout(() => setSuccessMessage(''), 5000);
-  };
+    // Reset form
+    setFormData({ name: "", email: "", goal: "" })
+
+    // Hide success message after 5 seconds
+    setTimeout(() => setIsSuccess(false), 5000)
+  }
 
   return (
-    <section className="bg-gradient-to-b from-primary/10 to-background py-16 md:py-24 px-4">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          {/* Left content */}
-          <div className="space-y-6">
-            <h2 className="text-4xl md:text-5xl font-bold text-balance leading-tight">
-              O Futuro do Trabalho Começa Agora
-            </h2>
-            <p className="text-lg text-foreground/70 leading-relaxed">
-              A automação e IA estão transformando o mercado. Profissionais que se adaptam prosperam. 
-              Descubra como você pode estar preparado para os desafios e oportunidades de amanhã.
+    <section className="py-16 md:py-24 lg:py-32 bg-gradient-to-br from-primary/5 to-background">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          {/* Content */}
+          <div>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-balance mb-6">
+              O Futuro do Trabalho Começa <span className="text-primary">Agora</span>
+            </h1>
+            <p className="text-lg md:text-xl text-muted-foreground text-pretty mb-8 leading-relaxed">
+              A automação e a IA estão transformando o mercado. Não fique para trás. Aprenda as habilidades que o futuro
+              exige e garanta sua relevância profissional.
             </p>
-            <div className="flex gap-4 flex-wrap">
-              <button
-                onClick={() => document.getElementById('form-section')?.scrollIntoView({ behavior: 'smooth' })}
-                className="px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                aria-label="Inscrever-se no nosso programa"
-              >
-                Comece Aqui
-              </button>
-              <button
-                onClick={() => document.getElementById('cursos')?.scrollIntoView({ behavior: 'smooth' })}
-                className="px-6 py-3 border-2 border-primary text-primary rounded-lg font-medium hover:bg-primary/5 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                aria-label="Explorar nossos cursos"
-              >
-                Ver Cursos
-              </button>
-            </div>
+            <ul className="space-y-3 text-muted-foreground">
+              <li className="flex items-start gap-2">
+                <span className="text-primary font-bold mt-1">✓</span>
+                <span>Cursos práticos focados em habilidades do futuro</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary font-bold mt-1">✓</span>
+                <span>Orientação especializada para reconversão profissional</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary font-bold mt-1">✓</span>
+                <span>Comunidade de profissionais em transformação</span>
+              </li>
+            </ul>
           </div>
 
-          {/* Right - Form */}
-          <div id="form-section" className="bg-white dark:bg-accent rounded-2xl p-8 shadow-lg">
-            <h3 className="text-2xl font-bold mb-6 text-foreground">Comece Sua Transformação</h3>
+          {/* Form */}
+          <div className="bg-card border border-border rounded-lg shadow-lg p-6 md:p-8">
+            <h2 className="text-2xl font-bold mb-6 text-foreground">Comece Sua Transformação</h2>
 
-            <form onSubmit={handleSubmit} className="space-y-5" aria-label="Formulário de inscrição">
-              {/* Success Message with aria-live */}
-              {successMessage && (
-                <div
-                  role="status"
-                  aria-live="polite"
-                  className="p-4 bg-green-50 border border-green-200 text-green-800 rounded-lg text-sm"
-                >
-                  {successMessage}
-                </div>
-              )}
-
-              {/* Name Field */}
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium mb-2 text-foreground">
-                  Nome Completo <span className="text-primary">*</span>
-                </label>
-                <input
-                  id="name"
-                  type="text"
-                  value={formState.name}
-                  onChange={(e) => setFormState({ ...formState, name: e.target.value })}
-                  aria-invalid={!!errors.name}
-                  aria-describedby={errors.name ? 'name-error' : undefined}
-                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-foreground bg-background"
-                  placeholder="Seu nome"
-                />
-                {errors.name && (
-                  <p id="name-error" className="mt-1 text-sm text-red-600">
-                    {errors.name}
-                  </p>
-                )}
-              </div>
-
-              {/* Email Field */}
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium mb-2 text-foreground">
-                  E-mail <span className="text-primary">*</span>
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  value={formState.email}
-                  onChange={(e) => setFormState({ ...formState, email: e.target.value })}
-                  aria-invalid={!!errors.email}
-                  aria-describedby={errors.email ? 'email-error' : undefined}
-                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-foreground bg-background"
-                  placeholder="seu@email.com"
-                />
-                {errors.email && (
-                  <p id="email-error" className="mt-1 text-sm text-red-600">
-                    {errors.email}
-                  </p>
-                )}
-              </div>
-
-              {/* Objective Field */}
-              <div>
-                <label htmlFor="objective" className="block text-sm font-medium mb-2 text-foreground">
-                  Objetivo Profissional <span className="text-primary">*</span>
-                </label>
-                <select
-                  id="objective"
-                  value={formState.objective}
-                  onChange={(e) => setFormState({ ...formState, objective: e.target.value })}
-                  aria-invalid={!!errors.objective}
-                  aria-describedby={errors.objective ? 'objective-error' : undefined}
-                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-foreground bg-background"
-                >
-                  <option value="">Selecione seu objetivo...</option>
-                  <option value="reskilling">Reskilling - Aprenda novas habilidades</option>
-                  <option value="upskilling">Upskilling - Melhore suas competências</option>
-                  <option value="transition">Transição de carreira</option>
-                  <option value="leadership">Desenvolvimento de liderança</option>
-                </select>
-                {errors.objective && (
-                  <p id="objective-error" className="mt-1 text-sm text-red-600">
-                    {errors.objective}
-                  </p>
-                )}
-              </div>
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                aria-busy={isLoading}
+            {isSuccess && (
+              <div
+                className="mb-6 p-4 bg-primary/10 border border-primary rounded-md text-primary"
+                role="alert"
+                aria-live="polite"
               >
-                {isLoading ? 'Enviando...' : 'Inscrever-se Agora'}
-              </button>
+                ✓ Cadastro realizado com sucesso! Em breve você receberá mais informações.
+              </div>
+            )}
 
-              <p className="text-xs text-foreground/60">
-                Seus dados são protegidos. Não compartilhamos com terceiros.
-              </p>
+            <form onSubmit={handleSubmit} noValidate>
+              <div className="space-y-4">
+                {/* Name Field */}
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium mb-2 text-foreground">
+                    Nome Completo *
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-foreground text-base"
+                    aria-invalid={!!errors.name}
+                    aria-describedby={errors.name ? "name-error" : undefined}
+                  />
+                  {errors.name && (
+                    <p id="name-error" className="mt-1 text-sm text-destructive" role="alert">
+                      {errors.name}
+                    </p>
+                  )}
+                </div>
+
+                {/* Email Field */}
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium mb-2 text-foreground">
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-foreground text-base"
+                    aria-invalid={!!errors.email}
+                    aria-describedby={errors.email ? "email-error" : undefined}
+                  />
+                  {errors.email && (
+                    <p id="email-error" className="mt-1 text-sm text-destructive" role="alert">
+                      {errors.email}
+                    </p>
+                  )}
+                </div>
+
+                {/* Goal Field */}
+                <div>
+                  <label htmlFor="goal" className="block text-sm font-medium mb-2 text-foreground">
+                    Objetivo Profissional *
+                  </label>
+                  <select
+                    id="goal"
+                    name="goal"
+                    value={formData.goal}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-foreground text-base"
+                    aria-invalid={!!errors.goal}
+                    aria-describedby={errors.goal ? "goal-error" : undefined}
+                  >
+                    <option value="">Selecione uma opção</option>
+                    <option value="reskilling">Reconversão (Mudar de área)</option>
+                    <option value="upskilling">Aprimoramento (Evoluir na área atual)</option>
+                    <option value="first-job">Primeiro emprego em tech</option>
+                    <option value="entrepreneurship">Empreendedorismo</option>
+                  </select>
+                  {errors.goal && (
+                    <p id="goal-error" className="mt-1 text-sm text-destructive" role="alert">
+                      {errors.goal}
+                    </p>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full bg-primary text-primary-foreground py-3 px-6 rounded-md font-medium hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[44px]"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+                      <span>Enviando...</span>
+                    </>
+                  ) : (
+                    "Começar Agora"
+                  )}
+                </button>
+              </div>
             </form>
           </div>
         </div>
       </div>
     </section>
-  );
+  )
 }
