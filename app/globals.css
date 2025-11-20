@@ -1,0 +1,98 @@
+@import 'tailwindcss';
+
+@theme inline {
+  --font-sans: 'Inter', 'Helvetica Neue', sans-serif;
+  --color-background: #ffffff;
+  --color-foreground: #0f172a;
+  --color-accent: #f0f7ff;
+  --color-primary: #2563eb;
+  --color-primary-foreground: #ffffff;
+  --color-border: #e2e8f0;
+}
+
+* {
+  /* Ensures smooth focus for keyboard navigation */
+  outline-offset: 2px;
+}
+
+@supports (selector(:focus-visible)) {
+  *:focus {
+    outline: none;
+  }
+  
+  *:focus-visible {
+    outline: 2px solid var(--color-primary);
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  /* Accessible line-height for readability */
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+/* Ensures minimum font size of 16px for touch targets */
+input,
+button,
+select,
+textarea {
+  font-size: 16px;
+}
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.sr-only:focus,
+.focus\\:not-sr-only:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: inherit;
+  margin: inherit;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: more) {
+  body {
+    --color-foreground: #000000;
+    --color-primary: #0047ab;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Dark mode - Recommended for accessibility */
+@media (prefers-color-scheme: dark) {
+  @theme inline {
+    --color-background: #0f172a;
+    --color-foreground: #f1f5f9;
+    --color-accent: #1e293b;
+    --color-border: #334155;
+  }
+}
